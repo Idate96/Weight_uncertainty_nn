@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
+import os
 from torch.nn import init
+print(os.getcwd())
 from torchvision import transforms
 from torch.autograd import Variable
 import torchvision
@@ -14,12 +16,14 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+loader_train, loader_val = data_loader_cifar()
+
 #
 plt.rcParams['figure.figsize'] = (10.0, 8.0) # set default size of plots
 plt.rcParams['image.interpolation'] = 'nearest'
 plt.rcParams['image.cmap'] = 'gray'
 
-def show_images(images, iter_num = None, save=True):
+def show_images(images, iter_num = None, save=True,  model=''):
     images = np.reshape(images, [images.shape[0], -1])  # images reshape to (batch_size, D)
     sqrtn = int(np.ceil(np.sqrt(images.shape[0])))
     sqrtimg = int(np.ceil(np.sqrt(images.shape[1])))
@@ -38,7 +42,7 @@ def show_images(images, iter_num = None, save=True):
     if iter_num:
         title = 'iter_' + str(iter_num)
         if save:
-            plt.savefig('bayes_lsq_loss_gan/' + title +'.png', bbox_inches='tight')
+            plt.savefig('results/' + model + '/' + title +'.png', bbox_inches='tight')
     return
 
 def preprocess_img(x):
@@ -64,38 +68,30 @@ class ChunkSampler(sampler.Sampler):
         return self.num_samples
 
 def data_loader(num_train=50000, num_val=5000, noise_dim=96, batch_size=128):
-
-    mnist_train = dset.MNIST('../MNIST_data', train=True, download=True,
-                               transform=T.ToTensor())
+    custom_trans = transforms.Compose([T.ToTensor(), T.Normalize((0.1307,), (0.3081,))])
+    mnist_train = dset.MNIST('datasets/MNIST_data', train=True, download=True,
+                               transform=custom_trans)
     loader_train = DataLoader(mnist_train, batch_size=batch_size,
                               sampler=ChunkSampler(num_train, 0))
 
-    mnist_val = dset.MNIST('../MNIST_data', train=True, download=True,
-                               transform=T.ToTensor())
+    mnist_val = dset.MNIST('datasets/MNIST_data', train=True, download=True,
+                               transform=custom_trans)
     loader_val = DataLoader(mnist_val, batch_size=batch_size,
                             sampler=ChunkSampler(num_val, num_train))
     return loader_train, loader_val
 
-def show_images_cifar(images, iter_num=None, save=True):
-        images = np.reshape(images, [images.shape[0], -1])  # images reshape to (batch_size, D)
-        sqrtn = int(np.ceil(np.sqrt(images.shape[0])))
 
-        fig = plt.figure(figsize=(10, 8))
-        gs = gridspec.GridSpec(sqrtn, sqrtn)
-        gs.update(wspace=0.05, hspace=0.05)
-
-        for i, img in enumerate(images):
-            ax = plt.subplot(gs[i])
-            plt.axis('off')
-            ax.set_xticklabels([])
-            ax.set_yticklabels([])
-            ax.set_aspect('equal')
-            plt.imshow(img.reshape([32, 32, 3]))
-        if iter_num:
-            title = 'iter_' + str(iter_num)
-            if save:
-                plt.savefig('dc_ls_loss_cifar/' + title + '.png', bbox_inches='tight')
-        return
+def show_cifar(image, iter_num=None, save=True, name='', show=False):
+    image_grid = torchvision.utils.make_grid(image, nrow=8)
+    npimg = (image_grid.numpy() * 0.5) + 0.5
+    plt.imshow(np.transpose(npimg, (1, 2, 0)), interpolation='nearest')
+    if save and iter_num is not None:
+        title = 'iter_' + str(iter_num)
+        plt.savefig('results/' + name + '/' + title + '.png',
+                    bbox_inches='tight')
+    if show:
+        plt.draw()
+        plt.pause(0.001)
 
 
 def data_loader_cifar(num_train=45000, num_val=5000, noise_dim = 96, batch_size = 128):
@@ -107,21 +103,24 @@ def data_loader_cifar(num_train=45000, num_val=5000, noise_dim = 96, batch_size 
     transform = transforms.Compose(
         [transforms.ToTensor(),
          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    cifar_train = dset.CIFAR10('../CIFAR10_data', train=True, download=True, transform=transform)
+    cifar_train = dset.CIFAR10('datasets/CIFAR10_data', train=True, download=True,
+                               transform=transform)
     loader_train = DataLoader(cifar_train, batch_size=batch_size, sampler=ChunkSampler(num_train,
                                                                                        0))
-    cifar_val = dset.CIFAR10('../CIFAR10_data', train=True, download=True, transform=transform)
+    cifar_val = dset.CIFAR10('datasets/CIFAR10_data', train=True, download=True,
+                             transform=transform)
     loader_val = DataLoader(cifar_val, batch_size=batch_size, sampler=ChunkSampler(num_val, num_train))
     return loader_train, loader_val
 
 
-def plot_batch_images(images, iter_num=None, save=True, cifar=False):
+def plot_batch_images(images, iter_num=None, save=True, cifar=False, name=''):
     # loader_train, loader_test = data_loader()
     # imgs = loader_train.__iter__().next()[0].view(loader_train.batch_size, 784).numpy().squeeze()
     if cifar:
-        show_images_cifar(images, iter_num, save)
+        # show_images_cifar(images, iter_num, save, name = '')
+        pass
     else:
-        show_images(images, iter_num, save)
+        show_images(images, iter_num, save, name='')
     plt.draw()
     plt.pause(0.001)
 
@@ -140,12 +139,20 @@ def sample_noise(batch_size, dim):
     return 2 * torch.rand(batch_size, dim) - 1
 
 def xavier_init(shape):
-    var = 2/(sum(shape))
+    std = (2/(shape[0]+shape[1]))**0.5
     # print("variance weights : ", var)
-    return torch.from_numpy(var * np.random.randn(*shape))
+    return torch.from_numpy(std * np.random.randn(*shape))
 
 
 def initialize_weights(m):
     """m is a layer"""
     if isinstance(m, nn.Linear) or isinstance(m, nn.ConvTranspose2d):
         init.xavier_uniform(m.weight.data)
+
+
+
+
+if __name__=='__main__':
+    for x, _ in loader_train:
+        print(np.shape(x))
+        plot_batch_images(x, iter_num=10, cifar=True, name='test_images', save=False)

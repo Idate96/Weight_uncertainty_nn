@@ -1,9 +1,9 @@
-from utils import data_loader, sample_noise, plot_batch_images
+from gans.utils import data_loader, sample_noise, plot_batch_images
 import torch
 import torch.nn as nn
 import torch.nn.functional as f
 import torch.optim as optim
-from utils import xavier_init
+from gans.utils import xavier_init
 from torch.nn import init
 from torch.autograd import Variable
 
@@ -11,9 +11,10 @@ noise_dim = 96
 batch_size = 128
 num_batches = int(50000/128)
 
-class Generator(nn.Module):
-    def __init__(self, learning_rate, hidden_dims):
+class Discriminator(nn.Module):
+    def __init__(self, learning_rate, hidden_dims, label=''):
         super().__init__()
+        self.label = label
         self.learning_rate = learning_rate
         self.hidden_dims = hidden_dims
         self.weight_std = 10**-3
@@ -22,13 +23,13 @@ class Generator(nn.Module):
         self.prior_weight = 0.5
         self.num_samples = 2
         # layers
-        self.W1_mu = nn.Parameter(xavier_init((noise_dim, self.hidden_dims[0])).type(torch.FloatTensor), requires_grad=True)
-        self.W1_rho = nn.Parameter(xavier_init((noise_dim, self.hidden_dims[0])).type(torch.FloatTensor), requires_grad=True)
+        self.W1_mu = nn.Parameter(xavier_init((28**2, self.hidden_dims[0])).type(torch.FloatTensor), requires_grad=True)
+        self.W1_rho = nn.Parameter(xavier_init((28**2, self.hidden_dims[0])).type(torch.FloatTensor), requires_grad=True)
         self.W2_mu = nn.Parameter(xavier_init((self.hidden_dims[0], self.hidden_dims[1])).type(torch.FloatTensor), requires_grad=True)
         self.W2_rho = nn.Parameter(xavier_init((self.hidden_dims[0], self.hidden_dims[1])).type(torch.FloatTensor), requires_grad=True)
-        self.W3_mu = nn.Parameter(xavier_init((self.hidden_dims[1], 28**2)).type(torch.FloatTensor),
+        self.W3_mu = nn.Parameter(xavier_init((self.hidden_dims[1], 1)).type(torch.FloatTensor),
                                   requires_grad=True)
-        self.W3_rho = nn.Parameter(xavier_init((self.hidden_dims[1], 28**2)).type(torch.FloatTensor),
+        self.W3_rho = nn.Parameter(xavier_init((self.hidden_dims[1], 1)).type(torch.FloatTensor),
                                    requires_grad=True)
         # layer bias
         self.b1_mu = nn.Parameter(xavier_init((self.hidden_dims[0],)).type(torch.FloatTensor),
@@ -37,8 +38,8 @@ class Generator(nn.Module):
                                    requires_grad=True)
         self.b2_mu = nn.Parameter(xavier_init((self.hidden_dims[1],)).type(torch.FloatTensor), requires_grad=True)
         self.b2_rho = nn.Parameter(xavier_init((self.hidden_dims[1],)).type(torch.FloatTensor), requires_grad=True)
-        self.b3_mu = nn.Parameter(xavier_init((28**2,)).type(torch.FloatTensor), requires_grad=True)
-        self.b3_rho = nn.Parameter(xavier_init((28**2,)).type(torch.FloatTensor), requires_grad=True)
+        self.b3_mu = nn.Parameter(xavier_init((1,)).type(torch.FloatTensor), requires_grad=True)
+        self.b3_rho = nn.Parameter(xavier_init((1,)).type(torch.FloatTensor), requires_grad=True)
 
     def compute_parameters(self):
         # print('w1_mu', self.W1_mu)
@@ -66,9 +67,9 @@ class Generator(nn.Module):
         self.compute_parameters()
         if input is not None:
             input = input.view(input.size(0), -1)
-            h1 = f.relu(torch.matmul(input, self.W1) + self.b1)
-            h2 = f.relu(torch.matmul(h1, self.W2) + self.b2)
-            preds = f.tanh(torch.matmul(h2, self.W3) + self.b3)
+            h1 = f.leaky_relu(torch.matmul(input, self.W1) + self.b1, negative_slope=0.01)
+            h2 = f.leaky_relu(torch.matmul(h1, self.W2) + self.b2, negative_slope=0.01)
+            preds = torch.matmul(h2, self.W3) + self.b3
             return preds
 
     def log_gaussian(self, x, mu, sigma):
@@ -86,7 +87,7 @@ class Generator(nn.Module):
 
     def log_likelyhood(self, x, predicted):
         prob = (- torch.log(self.sigma_1_prior) -
-               (x - predicted)**2 / (2 * self.sigma_1_prior**2))
+               (x - predicted)**2 / (2 * self.sigma_1_prior**2))*self.prior_weight
         return prob
 
     def log_posterior(self, x, mu, sigma):
@@ -94,22 +95,27 @@ class Generator(nn.Module):
         prob = self.log_gaussian(x, mu, sigma)
         return prob
 
-    def loss(self, scores_fake):
-        # we want ot fool the discriminator
-        target = 1
-        log_pw = 1/self.num_samples*(self.log_prior(self.W1).sum() + self.log_prior(self.W2).sum() +
+    def loss(self, logits_real, logits_fake):
+        target_real = 1
+        target_fake = 0
+        log_qw, log_pw, log_likelyhood_gauss = 0, 0, 0
+
+        log_pw += 1/self.num_samples*(self.log_prior(self.W1).sum() + self.log_prior(self.W2).sum() +
                                       self.log_prior(self.W3).sum())
         log_pw += 1/self.num_samples*(self.log_prior(self.b1).sum() + self.log_prior(self.b2).sum() +
                                       self.log_prior(self.b3).sum())
 
-        log_qw = 1 / self.num_samples * (self.log_posterior(self.W1, self.W1_mu, self.W1_sigma).sum() +
+        log_qw += 1 / self.num_samples * (self.log_posterior(self.W1, self.W1_mu, self.W1_sigma).sum() +
                                           self.log_posterior(self.W2, self.W2_mu, self.W2_sigma).sum() +
                                           self.log_posterior(self.W3, self.W3_mu, self.W3_sigma).sum())
         log_qw += 1 / self.num_samples * (self.log_posterior(self.b1, self.b1_mu, self.b1_sigma).sum() +
                                           self.log_posterior(self.b2, self.b2_mu, self.b2_sigma).sum() +
                                           self.log_posterior(self.b3, self.b3_mu, self.b3_sigma).sum())         # t2 = time.time()
 
-        log_likelyhood_gauss = 1/self.num_samples * self.log_likelyhood(scores_fake, target).sum()
+        log_likelyhood_gauss += 1/self.num_samples * self.log_likelyhood(logits_real,
+                                                                         target_real).sum()
+        log_likelyhood_gauss += 1/self.num_samples * self.log_likelyhood(logits_fake,
+                                                                         target_fake).sum()
 
         loss = 1/batch_size * (1/num_batches * (log_qw - log_pw) - log_likelyhood_gauss)
         return loss
