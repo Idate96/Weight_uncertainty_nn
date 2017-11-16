@@ -16,7 +16,6 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-loader_train, loader_val = data_loader_cifar()
 
 #
 plt.rcParams['figure.figsize'] = (10.0, 8.0) # set default size of plots
@@ -153,6 +152,7 @@ def initialize_weights(m):
 
 
 if __name__=='__main__':
-    for x, _ in loader_train:
-        print(np.shape(x))
-        plot_batch_images(x, iter_num=10, cifar=True, name='test_images', save=False)
+    # for x, _ in loader_train:
+    #     print(np.shape(x))
+    #     plot_batch_images(x, iter_num=10, cifar=True, name='test_images', save=False)
+    pass

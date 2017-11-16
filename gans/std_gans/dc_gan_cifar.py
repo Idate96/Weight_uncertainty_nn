@@ -150,7 +150,6 @@ def train(discriminator, generator, show_every= 250, num_epochs= 10, resume=Fals
                 continue
             dis_optimizer.zero_grad()
             real_data = Variable(x).type(torch.FloatTensor)
-            print(real_data.size())
             logits_real = discriminator(real_data).type(torch.FloatTensor)
 
             g_fake_seed = Variable(sample_noise(batch_size, noise_dim)).type(torch.FloatTensor)
@@ -184,5 +183,5 @@ def train(discriminator, generator, show_every= 250, num_epochs= 10, resume=Fals
 
 
 if __name__ == '__main__':
-    generator, discriminator = init_networks(label='dc_cifar_01')
+    generator, discriminator = init_networks(label='dc_cifar_02')
     train(discriminator, generator)

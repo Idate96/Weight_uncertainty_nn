@@ -38,8 +38,8 @@ class Discriminator(nn.Module):
             torch.FloatTensor), requires_grad=True)
         self.W1_rho = nn.Parameter(xavier_init((self.hidden_dims[0], self.hidden_dims[1])).type(
             torch.FloatTensor), requires_grad=True)
-        self.W2_mu = nn.Parameter(xavier_init((self.hidden_dims[0], self.hidden_dims[1])).type(torch.FloatTensor), requires_grad=True)
-        self.W2_rho = nn.Parameter(xavier_init((self.hidden_dims[0], self.hidden_dims[1])).type(torch.FloatTensor), requires_grad=True)
+        # self.W2_mu = nn.Parameter(xavier_init((self.hidden_dims[0], self.hidden_dims[1])).type(torch.FloatTensor), requires_grad=True)
+        # self.W2_rho = nn.Parameter(xavier_init((self.hidden_dims[0], self.hidden_dims[1])).type(torch.FloatTensor), requires_grad=True)
         self.W3_mu = nn.Parameter(xavier_init((self.hidden_dims[1], 1)).type(torch.FloatTensor),
                                   requires_grad=True)
         self.W3_rho = nn.Parameter(xavier_init((self.hidden_dims[1], 1)).type(torch.FloatTensor),
@@ -53,9 +53,9 @@ class Discriminator(nn.Module):
         self.W1 = (self.W1_mu+ self.W1_sigma * \
                    Variable(self.weight_std * torch.randn(self.W1_mu.size()), requires_grad=False))
 
-        self.W2_sigma = torch.log(1 + torch.exp(self.W2_rho))
-        self.W2 = (self.W2_mu + self.W2_sigma * \
-                   Variable(self.weight_std * torch.randn(self.W2_mu.size()), requires_grad=False))
+        # self.W2_sigma = torch.log(1 + torch.exp(self.W2_rho))
+        # self.W2 = (self.W2_mu + self.W2_sigma * \
+        #            Variable(self.weight_std * torch.randn(self.W2_mu.size()), requires_grad=False))
 
         self.W3_sigma = torch.log(1 + torch.exp(self.W3_rho))
         self.W3 = (self.W3_mu + self.W3_sigma * \
@@ -79,8 +79,8 @@ class Discriminator(nn.Module):
             output_max_pool_2 = f.max_pool2d(output_conv_2, (2, 2), stride=2)
             reshaped_input = output_max_pool_2.view(output_max_pool_2.size(0), -1)
             h1 = f.leaky_relu(torch.matmul(reshaped_input, self.W1), negative_slope=0.01)
-            h2 = f.leaky_relu(torch.matmul(h1, self.W2), negative_slope=0.01)
-            preds = torch.matmul(h2, self.W3)
+            # h2 = f.leaky_relu(torch.matmul(h1, self.W2), negative_slope=0.01)
+            preds = torch.matmul(h1, self.W3)
             return preds
 
     def log_gaussian(self, x, mu, sigma):
@@ -111,14 +111,15 @@ class Discriminator(nn.Module):
         target_fake = 0
         log_qw, log_pw, log_likelyhood_gauss = 0, 0, 0
 
-        log_pw += 1/self.num_samples*(self.log_prior(self.W1).sum() + self.log_prior(self.W2).sum() +
+        log_pw += 1/self.num_samples*(self.log_prior(self.W1).sum() +
+                                      # self.log_prior(self.W2).sum() +
                                       self.log_prior(self.W3).sum())
         log_pw += 1/self.num_samples*(self.log_prior(self.W1_conv).sum() + self.log_prior(
                                         self.W2_conv).sum())
 
 
         log_qw += 1 / self.num_samples * (self.log_posterior(self.W1, self.W1_mu, self.W1_sigma).sum() +
-                                          self.log_posterior(self.W2, self.W2_mu, self.W2_sigma).sum() +
+                                          # self.log_posterior(self.W2, self.W2_mu, self.W2_sigma).sum() +
                                           self.log_posterior(self.W3, self.W3_mu, self.W3_sigma).sum())
       # t2 = time.time()
         log_qw += 1/ self.num_samples * (self.log_posterior(self.W1_conv, self.W1_conv_mu,
@@ -134,4 +135,4 @@ class Discriminator(nn.Module):
         return loss
 
     def add_optimizer(self):
-        self.optimizer = optim.Adam(self.parameters(), lr=self.learning_rate, betas=(0.5, 0.999))
+        self.optimizer = optim.Adam(self.parameters(), lr=2e-4, betas=(0.5, 0.999))

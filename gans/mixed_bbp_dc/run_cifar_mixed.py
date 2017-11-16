@@ -4,14 +4,15 @@ Time per batch of 128 is 10 secs
 To see results I need 8 epochs each epoch is 390 batches.
 This means I need : 31200 secs => 9 hours at full speed
 """
+import numpy as np
 import torch
 import time
 from gans.utils import data_loader_cifar, sample_noise, plot_batch_images, show_cifar
 import torch.nn as nn
 import torch.optim as optim
 from torch.nn import init
-from gans.bbp_gans.bbp_dc.generator import Generator
-from gans.bbp_gans.bbp_dc.discriminator import Discriminator
+from gans.mixed_bbp_dc.generator import Generator
+from gans.mixed_bbp_dc.discriminator import discriminator_func, discriminator_loss, optimizer_discriminator
 from torch.autograd import Variable
 
 
@@ -23,32 +24,41 @@ loader_train, loader_val = data_loader_cifar()
 dtype = torch.FloatTensor
 
 
-def train(discriminator, generator, show_every=25, num_epochs=20, save_every = 2000):
+def train(discriminator, generator, show_every=25, num_epochs=20, save_every=2000):
+    analysed = 0
+    fooled = 0
     start_t = time.time()
     iter_count = 0
-    discriminator.add_optimizer()
+    optimizer_dis = optimizer_discriminator(discriminator)
     generator.add_optimizer()
     for epoch in range(num_epochs):
         for x, _ in loader_train:
             if len(x) != batch_size:
                 continue
-            discriminator.optimizer.zero_grad()
+            optimizer_dis.zero_grad()
             real_data = Variable(x).type(torch.FloatTensor)
-            logits_real = discriminator.forward(real_data).type(torch.FloatTensor)
+            logits_real = discriminator(real_data).type(torch.FloatTensor)
 
             g_fake_seed = Variable(sample_noise(batch_size, noise_dim)).type(torch.FloatTensor)
             fake_images = generator.forward(g_fake_seed)
-            logits_fake = discriminator.forward(fake_images.detach())
+            logits_fake = discriminator(fake_images.detach())
 
-            d_total_error = discriminator.loss(logits_real, logits_fake)
-            d_total_error.backward()
-            discriminator.optimizer.step()
+            analysed = batch_size
+            fooled = np.sum(logits_fake.data.numpy() > 0.5)
+            print("average logits fake ", torch.mean(logits_fake))
+            print("fooled : ", fooled)
+            print("analysed ", analysed)
+            print("guess ratio {0:.4f}" .format(fooled/analysed))
+            if fooled/analysed > 0.5 or epoch == 0:
+                d_total_error = discriminator_loss(logits_real, logits_fake)
+                d_total_error.backward()
+                optimizer_dis.step()
 
             generator.optimizer.zero_grad()
             g_fake_seed = Variable(sample_noise(batch_size, noise_dim)).type(torch.FloatTensor)
             fake_images = generator.forward(g_fake_seed)
 
-            gen_logits_fake = discriminator.forward(fake_images)
+            gen_logits_fake = discriminator(fake_images)
             g_loss = generator.loss(gen_logits_fake)
             g_loss.backward()
             generator.optimizer.step()
@@ -71,6 +81,6 @@ def train(discriminator, generator, show_every=25, num_epochs=20, save_every = 2
                            + '.pt')
 
 if __name__ == '__main__':
-    generator = Generator(10**-3, [1024, 1024], label='bbp_dc_cifar_01')
-    discriminator = Discriminator(10**-3, [1600, 1600], label='bbp_dc_cifar_00')
+    generator = Generator(10**-3, [1024, 1024], label='mixed_dc_cifar_02')
+    discriminator = discriminator_func()
     train(discriminator, generator)
