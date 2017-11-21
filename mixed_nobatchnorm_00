@@ -1,0 +1,677 @@
+def discriminator_func():
+    """
+    Build and return a PyTorch model for the DCGAN discriminator implementing
+    the architecture above.
+    """
+    return nn.Sequential(
+        # Unflatten(batch_size, 3, 32, 32),
+        nn.Conv2d(3, 32, 5, stride=1),
+        nn.MaxPool2d(2, stride=2),
+        nn.Conv2d(32, 32, 5, stride=1),
+        nn.MaxPool2d(2, stride=2),
+        Flatten(),
+        nn.Linear(800, 800),
+        nn.ReLU(),
+        nn.Linear(800, 1)
+    )
+#
+
+learning rate 10**-5 for discriminator and 10**-4 for the geneator
+
+/Users/lorenzoterenzi/anaconda3/bin/python "/Users/lorenzoterenzi/Documents/Computer Science/AI/Weight_uncertainty_nn/gans/mixed_bbp_dc/run_cifar_mixed.py"
+/Users/lorenzoterenzi/Documents/Computer Science/AI/Weight_uncertainty_nn
+/Users/lorenzoterenzi/Documents/Computer Science/AI/Weight_uncertainty_nn
+Files already downloaded and verified
+Files already downloaded and verified
+average logits fake  Variable containing:
+-0.1014
+[torch.FloatTensor of size 1]
+
+time : 13.96 sec
+Iter: 0, D: 1.384, G:3.065e+05
+real logits average
+1.00000e-02 *
+ -9.1186
+[torch.FloatTensor of size 1]
+
+average output generator :
+1.00000e-02 *
+  4.1962
+[torch.FloatTensor of size 1]
+
+fake logits average
+-0.1055
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+1.00000e-02 *
+ -6.4799
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+1.00000e-02 *
+ -2.5897
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+1.00000e-02 *
+  1.2493
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+1.00000e-02 *
+  4.3662
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+1.00000e-02 *
+  8.1904
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1272
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1578
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1974
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2442
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2692
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3052
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3456
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3619
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3990
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4297
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4428
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4656
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4943
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5000
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5187
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5399
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5409
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5589
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5789
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5716
+[torch.FloatTensor of size 1]
+
+time : 304.19 sec
+Iter: 25, D: 1.762, G:4.695e+04
+real logits average
+1.00000e-02 *
+ -9.2982
+[torch.FloatTensor of size 1]
+
+average output generator :
+1.00000e-02 *
+  5.7678
+[torch.FloatTensor of size 1]
+
+fake logits average
+ 0.5713
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5856
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6071
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5973
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6121
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6249
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6128
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6263
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6395
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6226
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6399
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6506
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6335
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6435
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6568
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6323
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6454
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6559
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6342
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6443
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6540
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6285
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6391
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6477
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6198
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6303
+[torch.FloatTensor of size 1]
+
+time : 581.96 sec
+Iter: 50, D: 1.813, G:3.51e+04
+real logits average
+-0.1020
+[torch.FloatTensor of size 1]
+
+average output generator :
+1.00000e-02 *
+  6.1474
+[torch.FloatTensor of size 1]
+
+fake logits average
+ 0.6304
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6377
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6147
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6207
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6290
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6022
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6101
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6147
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5913
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5985
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.6067
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5788
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5840
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5938
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5640
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5715
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5768
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5488
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5549
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5605
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5316
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5381
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5438
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5150
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5207
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5256
+[torch.FloatTensor of size 1]
+
+time : 792.11 sec
+Iter: 75, D: 1.741, G:6.653e+04
+real logits average
+-0.1112
+[torch.FloatTensor of size 1]
+
+average output generator :
+1.00000e-02 *
+  5.6270
+[torch.FloatTensor of size 1]
+
+fake logits average
+ 0.4878
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4955
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5009
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.5070
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4757
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4803
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4868
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4550
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4605
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4648
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4345
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4386
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4435
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4128
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4175
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4228
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3910
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3952
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.4009
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3688
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3750
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3803
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3485
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3544
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3589
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3295
+[torch.FloatTensor of size 1]
+
+time : 930.22 sec
+Iter: 100, D: 1.651, G:1.135e+05
+real logits average
+-0.1328
+[torch.FloatTensor of size 1]
+
+average output generator :
+1.00000e-02 *
+  5.9237
+[torch.FloatTensor of size 1]
+
+fake logits average
+ 0.3290
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3342
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3401
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3097
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3159
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3215
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2903
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2944
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.3006
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2701
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2762
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2824
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2506
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2572
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2626
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2328
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2371
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2433
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2147
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2224
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2275
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2000
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2052
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.2106
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1806
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1849
+[torch.FloatTensor of size 1]
+
+time : 1074.80 sec
+Iter: 125, D: 1.571, G:1.671e+05
+real logits average
+-0.1444
+[torch.FloatTensor of size 1]
+
+average output generator :
+1.00000e-02 *
+  7.0619
+[torch.FloatTensor of size 1]
+
+fake logits average
+ 0.1846
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1930
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1629
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1690
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1745
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1444
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1492
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1535
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1247
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1303
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1372
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1090
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1138
+[torch.FloatTensor of size 1]
+
+average logits fake  Variable containing:
+ 0.1201
+[torch.FloatTensor of size 1]

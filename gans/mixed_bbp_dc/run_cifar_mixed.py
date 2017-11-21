@@ -35,6 +35,17 @@ def train(discriminator, generator, show_every=25, num_epochs=20, save_every=200
         for x, _ in loader_train:
             if len(x) != batch_size:
                 continue
+            weights_init = discriminator.state_dict()["7.weight"][:]
+            if iter_count == 0:
+                weights_average = {}
+                weights_average_gen = {}
+                for name, value in discriminator.state_dict().items():
+                    weights_average[name] = torch.mean(value)
+                for name, value in generator.state_dict().items():
+                    weights_average_gen[name] = torch.mean(value)
+                print("Average value of initialized weights dis : \n", weights_average)
+                print("Average value of initialized weights gen : \n", weights_average_gen)
+
             optimizer_dis.zero_grad()
             real_data = Variable(x).type(torch.FloatTensor)
             logits_real = discriminator(real_data).type(torch.FloatTensor)
@@ -43,13 +54,15 @@ def train(discriminator, generator, show_every=25, num_epochs=20, save_every=200
             fake_images = generator.forward(g_fake_seed)
             logits_fake = discriminator(fake_images.detach())
 
-            analysed = batch_size
-            fooled = np.sum(logits_fake.data.numpy() > 0.5)
+            # analysed = batch_size
+            # fooled = np.sum(logits_fake.data.numpy() > 0.5)
+            # print("average logits real ", torch.mean(logits_real))
             print("average logits fake ", torch.mean(logits_fake))
-            print("fooled : ", fooled)
-            print("analysed ", analysed)
-            print("guess ratio {0:.4f}" .format(fooled/analysed))
-            if fooled/analysed > 0.5 or epoch == 0:
+            # print("fooled : ", fooled)
+            # print("analysed ", analysed)
+            # print("guess ratio {0:.4f}" .format(fooled/analysed))
+            # if fooled/analysed > 0.5 or iter_count == 0:
+            if iter_count % 3 == 0:
                 d_total_error = discriminator_loss(logits_real, logits_fake)
                 d_total_error.backward()
                 optimizer_dis.step()
@@ -62,6 +75,13 @@ def train(discriminator, generator, show_every=25, num_epochs=20, save_every=200
             g_loss = generator.loss(gen_logits_fake)
             g_loss.backward()
             generator.optimizer.step()
+
+
+            weights_after = discriminator.state_dict()["7.weight"]
+            if iter_count > 0:
+                assert weights_after.numpy().all() == weights_init.numpy().all(), "Discriminator has " \
+                                                                          "trained"
+
 
             if (iter_count % show_every == 0):
                 checkpt_t = time.time()
@@ -81,6 +101,6 @@ def train(discriminator, generator, show_every=25, num_epochs=20, save_every=200
                            + '.pt')
 
 if __name__ == '__main__':
-    generator = Generator(10**-3, [1024, 1024], label='mixed_dc_cifar_02')
+    generator = Generator(10**-3, [1024, 1024], label='mixed_dc_cifar_03')
     discriminator = discriminator_func()
     train(discriminator, generator)

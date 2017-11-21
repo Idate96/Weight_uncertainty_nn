@@ -139,7 +139,7 @@ def init_networks(resume=False, label=''):
     discriminator_n.label = label
     return generator_n, discriminator_n
 
-def train(discriminator, generator, show_every= 250, num_epochs= 10, resume=False,
+def train(discriminator, generator, show_every= 25, num_epochs= 10, resume=False,
           save_every = 2000):
     iter_count = 0
     dis_optimizer = optimizer_discriminator(discriminator)
@@ -148,13 +148,25 @@ def train(discriminator, generator, show_every= 250, num_epochs= 10, resume=Fals
         for x, _ in loader_train:
             if len(x) != batch_size:
                 continue
+            if iter_count == 0:
+                weights_average = {}
+                weights_average_gen = {}
+                for name, value in discriminator.state_dict().items():
+                    weights_average[name] = torch.mean(value)
+                for name, value in generator.state_dict().items():
+                    weights_average_gen[name] = torch.mean(value)
+                print("Average value of initialized weights dis : \n", weights_average)
+                print("Average value of initialized weights gen : \n", weights_average_gen)
+
             dis_optimizer.zero_grad()
             real_data = Variable(x).type(torch.FloatTensor)
             logits_real = discriminator(real_data).type(torch.FloatTensor)
 
+            print("Average logits real :", torch.mean(logits_real).data.numpy())
             g_fake_seed = Variable(sample_noise(batch_size, noise_dim)).type(torch.FloatTensor)
             fake_images = generator(g_fake_seed)
             logits_fake = discriminator(fake_images.detach())
+            print("Avarage logits fake :", torch.mean(logits_fake).data.numpy())
 
             d_total_error = discriminator_loss(logits_real, logits_fake)
             d_total_error.backward()
@@ -183,5 +195,5 @@ def train(discriminator, generator, show_every= 250, num_epochs= 10, resume=Fals
 
 
 if __name__ == '__main__':
-    generator, discriminator = init_networks(label='dc_cifar_02')
+    generator, discriminator = init_networks(label='dc_cifar_04')
     train(discriminator, generator)

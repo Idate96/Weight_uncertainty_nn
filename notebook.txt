@@ -1,0 +1,52 @@
+21/nov
+Tried to use a-sequential training of discriminator and generator since right now the generator
+seems unable to fool the discriminator. This means thant the
+discriminator gets trained only if the generator fools it more than half of the time.
+Problems: if this procedure is applied from step one, I observe that the number of time the
+disciminator is fooled is 0 (out of 128) and the average output of fake samples tends to
+descrease instead of going towards 1. Possible cause is that the discriminator is not trained at
+the beginning in recognising real data therefore the generator might train for something weird
+(still does not explain why the average output descreases).
+I observe also that logits real increase and tends towards 1 with increasing iteration number.
+Possible cause is that the discriminator is training anyway.
+
+Weird thing: the averages of real and fake grow
+ well beyond the range [-1,1] even if the bceloss shold minimized for values close to -1 and 1.
+
+Solved: typo in code instead of iteration number it was epoch number, so for epoch 0 the
+discriminator still trained.
+
+New observation:
+even if the discriminator does not train the generator seems to be stuck and does not produce
+samples that fool the discriminator. Maybe applying this policy too early in the training is not
+beneficial.
+
+Obervasion: empirically not working.
+
+Afternoon:
+=========
+Unstable:
+    return nn.Sequential(
+        # Unflatten(batch_size, 3, 32, 32),
+        nn.Conv2d(3, 32, 5, stride=1),
+        nn.MaxPool2d(2, stride=2),
+        nn.Conv2d(32, 32, 5, stride=1),
+        nn.MaxPool2d(2, stride=2),
+        Flatten(),
+        nn.Linear(800, 800),
+        nn.ReLU(),
+        nn.Linear(800, 1)
+    )
+    the discriminator recognises fake samples
+
+Trial : Removal of the batchnorm layer
+current set up: gen alpha = 10**-4
+                dis alpha = 10**-5
+No normalization layers ---
+Average fake logits seems to oscillate between 0.6 and 0.15
+problem is that the real ones have a negative values of -0.15.
+Images do not look good (mixed_dc_cifar_02)
+
+New Trail:
+Reduce the weight_std to 10**-4 from 10**-3 in case the initial weights were too high as could be
+ seen comparing image 0 from dc_std and bayesian ones.

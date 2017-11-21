@@ -17,11 +17,11 @@ class Generator(nn.Module):
         self.label = label
         self.learning_rate = learning_rate
         self.hidden_dims = hidden_dims
-        self.weight_std = 10**-3
+        self.weight_std = 10**-4
         self.sigma_1_prior = Variable(torch.Tensor([0.001]), requires_grad=False)
         self.sigma_2_prior = Variable(torch.Tensor([10**-7]), requires_grad=False)
         self.prior_weight = 0.5
-        self.num_samples = 2
+        self.num_samples = 3
         # layers
         self.W1_mu = nn.Parameter(xavier_init((noise_dim, self.hidden_dims[0])).type(torch.FloatTensor), requires_grad=True)
         self.W1_rho = nn.Parameter(xavier_init((noise_dim, self.hidden_dims[0])).type(torch.FloatTensor), requires_grad=True)
@@ -74,15 +74,15 @@ class Generator(nn.Module):
             input = input.view(input.size(0), -1)
             h1 = f.leaky_relu(torch.matmul(input, self.W1))
             norm_layer1 = nn.BatchNorm1d(self.hidden_dims[0])
-            h1 = norm_layer1(h1)
+            # h1 = norm_layer1(h1)
             h2 = f.leaky_relu(torch.matmul(h1, self.W2))
             norm_layer2 = nn.BatchNorm1d(128*7*7)
-            h2 = norm_layer2(h2)
+            # h2 = norm_layer2(h2)
             # batch-norm and convolution
             x = h2.view(batch_size, 128, 7, 7)
             output_deconv_1 = f.leaky_relu(f.conv_transpose2d(x, self.W1_deconv, stride=2, padding=1))
             norm_layer3 = nn.BatchNorm2d(64)
-            output_deconv_1 = norm_layer3(output_deconv_1)
+            # output_deconv_1 = norm_layer3(output_deconv_1)
             output_deconv_2 = f.conv_transpose2d(output_deconv_1, self.W2_deconv, stride=2,
                                                  padding=1)
             preds = f.tanh(output_deconv_2)
@@ -103,7 +103,7 @@ class Generator(nn.Module):
 
     def log_likelyhood(self, x, predicted):
         prob = (- torch.log(self.sigma_1_prior) -
-               (x - predicted)**2 / (2 * self.sigma_1_prior**2))
+               (x - predicted) ** 2 / (2 * self.sigma_1_prior**2))
         return prob
 
     def log_posterior(self, x, mu, sigma):
@@ -136,4 +136,4 @@ class Generator(nn.Module):
         return loss
 
     def add_optimizer(self):
-        self.optimizer = optim.Adam(self.parameters(), lr=1e-4, betas=(0.5, 0.999))
+        self.optimizer = optim.Adam(self.parameters(), lr=2e-4, betas=(0.5, 0.999))
