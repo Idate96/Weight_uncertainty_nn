@@ -50,3 +50,14 @@ Images do not look good (mixed_dc_cifar_02)
 New Trail:
 Reduce the weight_std to 10**-4 from 10**-3 in case the initial weights were too high as could be
  seen comparing image 0 from dc_std and bayesian ones.
+
+ 22/nov
+ ===========
+ - tried to train equally generator and discriminator reducing the learning rate of the generator
+ to 10-4
+
+ - Changed the xavier init for the convolutional layers. parallel training. alpha = 10**-4. mixed 06
+ - Removed batchnorm and asequential training. mixed 07
+
+ 23/nov
+ - tried to reduce the distribution of the prior to a spikE. mixed_dc_cifar_08 : FAILURE

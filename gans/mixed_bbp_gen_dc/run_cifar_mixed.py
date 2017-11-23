@@ -11,8 +11,8 @@ from gans.utils import data_loader_cifar, sample_noise, plot_batch_images, show_
 import torch.nn as nn
 import torch.optim as optim
 from torch.nn import init
-from gans.mixed_bbp_dc.generator import Generator
-from gans.mixed_bbp_dc.discriminator import discriminator_func, discriminator_loss, optimizer_discriminator
+from gans.mixed_bbp_gen_dc.generator import Generator
+from gans.mixed_bbp_gen_dc.discriminator import discriminator_func, discriminator_loss, optimizer_discriminator
 from torch.autograd import Variable
 
 
@@ -24,9 +24,7 @@ loader_train, loader_val = data_loader_cifar()
 dtype = torch.FloatTensor
 
 
-def train(discriminator, generator, show_every=25, num_epochs=20, save_every=2000):
-    analysed = 0
-    fooled = 0
+def train(discriminator, generator, show_every=100, num_epochs=20, save_every=2000):
     start_t = time.time()
     iter_count = 0
     optimizer_dis = optimizer_discriminator(discriminator)
@@ -35,7 +33,7 @@ def train(discriminator, generator, show_every=25, num_epochs=20, save_every=200
         for x, _ in loader_train:
             if len(x) != batch_size:
                 continue
-            weights_init = discriminator.state_dict()["7.weight"][:]
+            # weights_init = discriminator.state_dict()["7.weight"][:]
             if iter_count == 0:
                 weights_average = {}
                 weights_average_gen = {}
@@ -62,14 +60,14 @@ def train(discriminator, generator, show_every=25, num_epochs=20, save_every=200
             # print("analysed ", analysed)
             # print("guess ratio {0:.4f}" .format(fooled/analysed))
             # if fooled/analysed > 0.5 or iter_count == 0:
-            if iter_count % 3 == 0:
-                d_total_error = discriminator_loss(logits_real, logits_fake)
-                d_total_error.backward()
-                optimizer_dis.step()
+            d_total_error = discriminator_loss(logits_real, logits_fake)
+            d_total_error.backward()
+            optimizer_dis.step()
 
             generator.optimizer.zero_grad()
             g_fake_seed = Variable(sample_noise(batch_size, noise_dim)).type(torch.FloatTensor)
             fake_images = generator.forward(g_fake_seed)
+            print("average output generator :", torch.mean(fake_images).data.numpy())
 
             gen_logits_fake = discriminator(fake_images)
             g_loss = generator.loss(gen_logits_fake)
@@ -77,10 +75,10 @@ def train(discriminator, generator, show_every=25, num_epochs=20, save_every=200
             generator.optimizer.step()
 
 
-            weights_after = discriminator.state_dict()["7.weight"]
-            if iter_count > 0:
-                assert weights_after.numpy().all() == weights_init.numpy().all(), "Discriminator has " \
-                                                                          "trained"
+            # weights_after = discriminator.state_dict()["7.weight"]
+            # if iter_count > 0:
+                # assert weights_after.numpy().all() == weights_init.numpy().all(), "Discriminator has " \
+                #                                                           "trained"
 
 
             if (iter_count % show_every == 0):
@@ -101,6 +99,6 @@ def train(discriminator, generator, show_every=25, num_epochs=20, save_every=200
                            + '.pt')
 
 if __name__ == '__main__':
-    generator = Generator(10**-3, [1024, 1024], label='mixed_dc_cifar_03')
+    generator = Generator(10**-3, [1024, 1024], label='mixed_dc_cifar_08')
     discriminator = discriminator_func()
     train(discriminator, generator)

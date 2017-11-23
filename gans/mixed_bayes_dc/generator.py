@@ -114,25 +114,34 @@ class Generator(nn.Module):
     def loss(self, scores_fake):
         # we want ot fool the discriminator
         target = 1
-        log_pw = 1/self.num_samples*(self.log_prior(self.W1).sum() + self.log_prior(self.W2).sum())
-                                      # self.log_prior(self.W3).sum())
+        log_pw = 0
+        log_qw = 0
+        log_likelyhood_gauss = 0
 
-        log_pw += 1/self.num_samples*(self.log_prior(self.W1_deconv).sum() + self.log_prior(
-                                        self.W2_deconv).sum())
+        for _ in range(self.num_samples):
+            self.compute_parameters()
+            log_pw += 1/self.num_samples*(self.log_prior(self.W1).sum() + self.log_prior(
+                self.W2).sum())
+                                          # self.log_prior(self.W3).sum())
 
-        log_qw = 1 / self.num_samples * (self.log_posterior(self.W1, self.W1_mu, self.W1_sigma).sum() +
-                                          self.log_posterior(self.W2, self.W2_mu,
-                                                             self.W2_sigma).sum())
-                                          # self.log_posterior(self.W3, self.W3_mu, self.W3_sigma).sum())
-    # t2 = time.time()
-        log_qw += 1/ self.num_samples * (self.log_posterior(self.W1_deconv, self.W1_deconv_mu,
-                                                            self.W1_deconv_sigma).sum() +
-                    self.log_posterior(self.W2_deconv, self.W2_deconv_mu,
-                                       self.W2_deconv_sigma).sum())
+            log_pw += 1/self.num_samples*(self.log_prior(self.W1_deconv).sum() + self.log_prior(
+                                            self.W2_deconv).sum())
 
-        log_likelyhood_gauss = 1/self.num_samples * self.log_likelyhood(scores_fake, target).sum()
+            log_qw += 1 / self.num_samples * (self.log_posterior(self.W1, self.W1_mu,
+                                                                 self.W1_sigma).sum() +
+                                              self.log_posterior(self.W2, self.W2_mu,
+                                                                 self.W2_sigma).sum())
+                                              # self.log_posterior(self.W3, self.W3_mu, self.W3_sigma).sum())
+        # t2 = time.time()
+            log_qw += 1/ self.num_samples * (self.log_posterior(self.W1_deconv, self.W1_deconv_mu,
+                                                                self.W1_deconv_sigma).sum() +
+                        self.log_posterior(self.W2_deconv, self.W2_deconv_mu,
+                                           self.W2_deconv_sigma).sum())
 
-        loss = 1/batch_size * (1/num_batches * (log_qw - log_pw) - log_likelyhood_gauss)
+            log_likelyhood_gauss += 1/self.num_samples * self.log_likelyhood(scores_fake,
+                                                                             target).sum()
+
+        loss = 1/batch_size * (1/num_batches * (log_qw - log_pw) - 2*log_likelyhood_gauss)
         return loss
 
     def add_optimizer(self):

@@ -165,6 +165,7 @@ def train(discriminator, generator, show_every= 25, num_epochs= 10, resume=False
             print("Average logits real :", torch.mean(logits_real).data.numpy())
             g_fake_seed = Variable(sample_noise(batch_size, noise_dim)).type(torch.FloatTensor)
             fake_images = generator(g_fake_seed)
+            print("average output generator :", torch.mean(fake_images).data.numpy())
             logits_fake = discriminator(fake_images.detach())
             print("Avarage logits fake :", torch.mean(logits_fake).data.numpy())
 

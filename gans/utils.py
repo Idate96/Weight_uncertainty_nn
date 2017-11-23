@@ -137,8 +137,11 @@ def sample_noise(batch_size, dim):
     """
     return 2 * torch.rand(batch_size, dim) - 1
 
-def xavier_init(shape):
-    std = (2/(shape[0]+shape[1]))**0.5
+def xavier_init(shape, convolution=False):
+    if convolution:
+        std = (2 / shape[1] * shape[2] * shape[3])**0.5
+    else:
+        std = (2/(shape[0]+shape[1]))**0.5
     # print("variance weights : ", var)
     return torch.from_numpy(std * np.random.randn(*shape))
 
