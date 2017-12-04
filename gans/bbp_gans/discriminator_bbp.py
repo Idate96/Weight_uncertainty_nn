@@ -32,14 +32,14 @@ class Discriminator(nn.Module):
         self.W3_rho = nn.Parameter(xavier_init((self.hidden_dims[1], 1)).type(torch.FloatTensor),
                                    requires_grad=True)
         # layer bias
-        self.b1_mu = nn.Parameter(xavier_init((self.hidden_dims[0],)).type(torch.FloatTensor),
+        self.b1_mu = nn.Parameter(torch.zeros((self.hidden_dims[0],)).type(torch.FloatTensor),
                                   requires_grad=True)
-        self.b1_rho = nn.Parameter(xavier_init((self.hidden_dims[0],)).type(torch.FloatTensor),
+        self.b1_rho = nn.Parameter(torch.zeros((self.hidden_dims[0],)).type(torch.FloatTensor),
                                    requires_grad=True)
-        self.b2_mu = nn.Parameter(xavier_init((self.hidden_dims[1],)).type(torch.FloatTensor), requires_grad=True)
-        self.b2_rho = nn.Parameter(xavier_init((self.hidden_dims[1],)).type(torch.FloatTensor), requires_grad=True)
-        self.b3_mu = nn.Parameter(xavier_init((1,)).type(torch.FloatTensor), requires_grad=True)
-        self.b3_rho = nn.Parameter(xavier_init((1,)).type(torch.FloatTensor), requires_grad=True)
+        self.b2_mu = nn.Parameter(torch.zeros((self.hidden_dims[1],)).type(torch.FloatTensor), requires_grad=True)
+        self.b2_rho = nn.Parameter(torch.zeros((self.hidden_dims[1],)).type(torch.FloatTensor), requires_grad=True)
+        self.b3_mu = nn.Parameter(torch.zeros((1,)).type(torch.FloatTensor), requires_grad=True)
+        self.b3_rho = nn.Parameter(torch.zeros((1,)).type(torch.FloatTensor), requires_grad=True)
 
     def compute_parameters(self):
         # print('w1_mu', self.W1_mu)

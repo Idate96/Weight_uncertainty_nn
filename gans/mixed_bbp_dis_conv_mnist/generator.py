@@ -46,7 +46,7 @@ def generator_func(noise=noise_dim):
         nn.ConvTranspose2d(64, 64, 6, stride=2, padding=1),
         nn.ReLU(),
         nn.BatchNorm2d(64),
-        nn.ConvTranspose2d(64, 3, 4, stride=2, padding=1),
+        nn.ConvTranspose2d(64, 1, 4, stride=2, padding=1),
         nn.Tanh(),
     )
 

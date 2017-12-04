@@ -61,3 +61,118 @@ Reduce the weight_std to 10**-4 from 10**-3 in case the initial weights were too
 
  23/nov
  - tried to reduce the distribution of the prior to a spikE. mixed_dc_cifar_08 : FAILURE
+ - reparametrized the sigma of my weights : mixed 09
+
+ 28/nov
+ -hyperparam, alpha_gen = 5*10**-5, alpha_dis = 2*10**-4, both of them failed => gen loss to 0 ~
+ by iter 100
+
+ 29/nov
+ - tried alpha = 10**-2 on mnist_dc_02
+ - possibly I was rehinitializing the batch norm layer at every forward pass
+ - linear_bbp_mnist 03 has lr = 10**-2
+ - linnear bbp mnist 04 has lr = 10**-3
+ - verified again if the run loop was ok by running bbg_mnist_vanilla_gan: 00 is a 1024 gen and
+ 256 dis, 01 is a 1024 gen and 1024 dis
+
+ - linear bbp is working !!!!
+ So the problem is in the conv layer, in particular I can observe a very high variance in the
+ output for the bbp_dc ~ 0.7 (close to 0.65 which is the final variance) while for linear bbp
+ variance (std) was around 0.15. Also the scores for the real and fake are much higher for the
+ bbp_dc (-30 -> 40) while for linear bbp is around (-1 -> 1)
+
+
+- layer values of linear bbp
+Mean conv W1 0.0034360938565805555, var 0.11377080449000224
+Mean conv W2 5.247736653052337e-07, var 0.020462624470097213
+Mean deconv W1 2.7766713986469426e-05, var 0.0127607639594995
+Mean deconv W2 -0.00020163840522968712, var 0.017868840674114993
+-------
+Mean deconv W1 2.456075873923043e-05, var 0.012740630568879552
+Mean deconv W2 -0.000761452912215077, var 0.017858482874779133
+Mean conv W1 0.006845721498320927, var 0.1114108896057762
+Mean conv W2 -1.2651664487748348e-05, var 0.020356754100119726
+---
+
+- mean weights convolution layer bbp dc, dis var = 10**-3, gen_var = 10**-3
+Mean conv W1 -0.0017901844112202525, var 0.18830768764019012
+Mean conv W2 0.0001306425838265568, var 0.04818439483642578
+Mean deconv W1 0.00011662465112749487, var 0.04158256575465202
+Mean deconv W2 0.004238971974700689, var 0.15434199571609497
+
+- mean weights convolution layer bbp dc, dis var = 10**-3, gen_var = 10**-3
+after multiplying average by 10**-3
+Mean conv W1 -2.5849312805803493e-06, var 0.000752749911043793
+Mean conv W2 1.1406334579078248e-06, var 0.0006946713547222316
+Mean deconv W1 3.804793209383206e-07, var 0.0006943131447769701
+Mean deconv W2 8.310007615364157e-07, var 0.0007171509205363691
+
+After modification we have for bbp_dc_mnist 05 :
+
+real logits average
+1.00000e-05 *
+  4.9756
+
+variance output generator :
+1.00000e-03 *
+  5.0969
+
+fake logits average
+1.00000e-06 *
+  3.8746
+(lr is kept to 10**-3
+bbp_dc_mnist_06 with std_mu = 10-2:
+real logits average  [-0.00174066]
+variance output generator :  [ 0.13664874]
+fake logits average  [ 0.02157151]
+
+bbp_dc_mnist_07 with std_mu = 10-1:
+real logits average  [  1.88627564e-05]
+variance output generator :  [ 0.0138533]
+fake logits average  [  3.54546537e-05]
+
+- bbp_mnist_dc 08 both gen and dis have std_mu = 1
+- bbp_mnist_dc 09 gen had std_mu = 0.5 and dis 1
+- bbp mnist_dc 10 gen has std_mu = 0.1 and dis 1
+- bbp mnist_dc 11 gen and dis have std_mu = 0.1 but learning is set to 10**-2
+
+30/nov
+modified utils to actually normalize the images of cifar
+-dc cifar 01 has lr = 10**-2, std_mu = 10**-1
+-dc cifar 02 has lr = 10**-3, std_mu = 10**-1
+-dc cifar 03 has lr = 10**-3, std_mu = 10**0
+
+3/nov
+bbp dc cifar 04 stdmu 10**-1 both
+Iter: 1850, D: 3.194e+04, G:3.224e+05
+real logits average  [ 0.79667431]
+variance fake images :  [ 0.25915033]
+variance real images :  [ 0.48347017]
+fake logits average  [ 0.20362097]
+shape images  torch.Size([64, 3, 32, 32])
+
+bbp dc cifar 05 stdmy 5*10**-1 dis and 10**-1 gen
+Iter: 1850, D: 4.578e+04, G:3.756e+05
+real logits average  [ 0.751041]
+variance fake images :  [ 0.65026551]
+variance real images :  [ 0.48347017]
+fake logits average  [ 0.14735331]
+shape images  torch.Size([64, 3, 32, 32])
+
+bbp dc cifar 06 std dis 10**1 and 10**-1 gen
+Iter: 1850, D: 6.356e+06, G:1.175e+06
+real logits average  [ 2.20522857]
+variance fake images :  [ 0.14014523]
+variance real images :  [ 0.48347017]
+fake logits average  [ 0.498703]
+shape images  torch.Size([64, 3, 32, 32])
+
+bbp dc cifar 07 std dis 10**-1 and 10**0 gen
+Iter: 1850, D: 6.121e+04, G:3.617e+05
+real logits average  [ 0.72854632]
+variance fake images :  [ 0.69793946]
+variance real images :  [ 0.48347017]
+fake logits average  [ 0.16591999]
+shape images  torch.Size([64, 3, 32, 32])
+
+bbp dc cifar 08 std dis 10**0 and 10**-1 for gen

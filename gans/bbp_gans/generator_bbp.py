@@ -27,21 +27,21 @@ class Generator(nn.Module):
         self.W1_rho = nn.Parameter(xavier_init((noise_dim, self.hidden_dims[0])).type(torch.FloatTensor), requires_grad=True)
         self.W2_mu = nn.Parameter(xavier_init((self.hidden_dims[0], self.hidden_dims[1])).type(torch.FloatTensor), requires_grad=True)
         self.W2_rho = nn.Parameter(xavier_init((self.hidden_dims[0], self.hidden_dims[1])).type(torch.FloatTensor), requires_grad=True)
-        self.W3_mu = nn.Parameter(xavier_init((self.hidden_dims[1], 32**2*3)).type(
+        self.W3_mu = nn.Parameter(xavier_init((self.hidden_dims[1], 28**2)).type(
             torch.FloatTensor),
                                   requires_grad=True)
-        self.W3_rho = nn.Parameter(xavier_init((self.hidden_dims[1], 32**2*3)).type(
+        self.W3_rho = nn.Parameter(xavier_init((self.hidden_dims[1], 28**2)).type(
             torch.FloatTensor),
                                    requires_grad=True)
         # layer bias
-        self.b1_mu = nn.Parameter(xavier_init((self.hidden_dims[0],)).type(torch.FloatTensor),
+        self.b1_mu = nn.Parameter(torch.zeros((self.hidden_dims[0],)).type(torch.FloatTensor),
                                   requires_grad=True)
-        self.b1_rho = nn.Parameter(xavier_init((self.hidden_dims[0],)).type(torch.FloatTensor),
+        self.b1_rho = nn.Parameter(torch.zeros((self.hidden_dims[0],)).type(torch.FloatTensor),
                                    requires_grad=True)
-        self.b2_mu = nn.Parameter(xavier_init((self.hidden_dims[1],)).type(torch.FloatTensor), requires_grad=True)
-        self.b2_rho = nn.Parameter(xavier_init((self.hidden_dims[1],)).type(torch.FloatTensor), requires_grad=True)
-        self.b3_mu = nn.Parameter(xavier_init((28**2,)).type(torch.FloatTensor), requires_grad=True)
-        self.b3_rho = nn.Parameter(xavier_init((28**2,)).type(torch.FloatTensor), requires_grad=True)
+        self.b2_mu = nn.Parameter(torch.zeros((self.hidden_dims[1],)).type(torch.FloatTensor), requires_grad=True)
+        self.b2_rho = nn.Parameter(torch.zeros((self.hidden_dims[1],)).type(torch.FloatTensor), requires_grad=True)
+        self.b3_mu = nn.Parameter(torch.zeros((28**2,)).type(torch.FloatTensor), requires_grad=True)
+        self.b3_rho = nn.Parameter(torch.zeros((28**2,)).type(torch.FloatTensor), requires_grad=True)
 
     def compute_parameters(self):
         # print('w1_mu', self.W1_mu)

@@ -1,11 +1,12 @@
-from gans.utils import data_loader, sample_noise, plot_batch_images
+from gans.utils import data_loader, sample_noise, show_images
 import torch
 import torch.nn as nn
+import time
 import torch.optim as optim
 from torch.nn import init
 from torch.autograd import Variable
-from gans.generator_bbp import Generator
-from gans.discriminator_bbp import Discriminator
+from gans.bbp_gans.discriminator_bbp import Discriminator
+from gans.bbp_gans.generator_bbp import Generator
 
 num_train=50000
 num_val=5000
@@ -81,6 +82,7 @@ def get_optimizer(model):
     return optimizer
 
 def train(discriminator, generator, discriminator_loss, generator_loss, show_every=250, num_epochs=20):
+    start_t = time.time()
     iter_count = 0
     discriminator.add_optimizer()
     generator.add_optimizer()
@@ -110,10 +112,15 @@ def train(discriminator, generator, discriminator_loss, generator_loss, show_eve
             generator.optimizer.step()
 
             if (iter_count % show_every == 0):
-                print('Iter: {}, D: {:.4}, G:{:.4}'.format(iter_count,d_total_error.data[0],g_loss.data[0]))
-                imgs_numpy = fake_images.data.cpu().numpy()
-                plot_batch_images(imgs_numpy[0:16], iter_num=iter_count)
-                print()
+                checkpt_t = time.time()
+                print("time : {:.2f} sec" .format(checkpt_t - start_t))
+                print('Iter: {}, D: {:.4}, G:{:.4}'.format(iter_count, d_total_error.data[0],
+                                                           g_loss.data[0]))
+                print("real logits average ", torch.mean(logits_real).data)
+                print("average output generator : ", torch.mean(fake_images).data)
+                print("fake logits average ", torch.mean(gen_logits_fake).data)
+                imgs = fake_images[:16].data.numpy()
+                show_images(imgs, iter_num=iter_count, save=True, show=False, model=generator.label)
             iter_count += 1
 
 if __name__ == '__main__':
